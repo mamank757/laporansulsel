@@ -766,9 +766,15 @@ FORMAT OUTPUT (WAJIB):
             
             if (!response.ok) throw new Error("Gagal terhubung ke Web App");
             const result = await response.json();
-            let rawContent = result.candidates[0].content.parts[0].text;
-            rawContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
-            const obj = JSON.parse(rawContent);
+
+// Validasi jika API mengirimkan error (misal limit token habis)
+if (!result.choices || !result.choices[0]) {
+    throw new Error(result.error ? result.error.message : "Gagal memuat balasan dari AI.");
+}
+
+let rawContent = result.choices[0].message.content;
+rawContent = rawContent.replace(/```json/g, "").replace(/```/g, "").trim();
+const obj = JSON.parse(rawContent);
 
             document.getElementById('out_kp').innerHTML = obj.kp.replace(/\n/g, '<br>');
             document.getElementById('out_latar').innerHTML = obj.latar.replace(/\n/g, '<br>');
